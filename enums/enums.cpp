@@ -6,15 +6,17 @@
 using namespace std;
 using namespace Catch::Matchers;
 
-enum GuitarType { strat = 1, tele, les_paul, };
+enum DayOfWeek { mon = 1, tue, wed, thd, fri, sat, sun};
 
 TEST_CASE("enum types in C++98")
 {
-    GuitarType guitar = strat;
+    DayOfWeek today = mon;
+    REQUIRE(today == 1);
 
-    int value = guitar;
+    int value = today;
+    ++value;
+    REQUIRE(value == 2);
 
-    guitar = static_cast<GuitarType>(2);
-
-    REQUIRE(guitar == tele);
+    DayOfWeek tomorrow = static_cast<DayOfWeek>(value);
+    REQUIRE(tomorrow == tue);
 }
