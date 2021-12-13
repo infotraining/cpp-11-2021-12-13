@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <list>
+#include <map>
 
 using namespace std;
 using namespace Catch::Matchers;
@@ -141,7 +142,50 @@ TEST_CASE("declaration syntax - auto")
         auto a4{10}; // int - since C++17
 
         auto list1 = {1, 2, 3, 4}; // std::initializer_list<int>
-        std::initializer_list<int> list2{1}; // int
-        auto list3{1};
     }
+}
+
+struct NoDefault
+{
+private:
+    NoDefault() {}
+public:
+    int foo() {
+        return 42;
+    }
+};
+
+TEST_CASE("decltype")
+{
+    int16_t x = 10;
+    decltype(x) y = 20;
+
+    std::vector<decltype(x)> vec = { x, y };
+
+    auto backup = vec; // copy
+    decltype(vec) empty; // no-copy
+
+    auto& ref_last_item = vec.back();
+
+    std::map<int, std::string> dict = { {1, "one"}, {2, "two"} };
+
+    decltype(dict[3]) ref_value = dict[2];
+
+    REQUIRE(dict.size() == 2);
+
+    std::vector<decltype(std::declval<NoDefault>().foo())> container;
+}
+
+template <typename T>
+auto multiply(const T& a, const T& b) -> decltype(a * b)
+{
+    return a * b;
+}
+
+TEST_CASE("multiply")
+{
+    int x = 10;
+    int y = 20;
+
+    int result = multiply(x, y);
 }
