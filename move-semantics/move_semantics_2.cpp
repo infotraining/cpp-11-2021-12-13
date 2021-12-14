@@ -99,4 +99,7 @@ TEST_CASE("move semantics - UniquePtr")
     pg1->use();
 
     UniquePtr<Gadget> pg2 = std::move(pg1);
+    pg2->use();
+
+    UniquePtr<Gadget> pg3 = nullptr;
 }
