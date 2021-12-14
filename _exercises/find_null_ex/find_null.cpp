@@ -10,6 +10,20 @@
 using namespace std;
 
 // TODO
+template<typename T>
+auto find_null(T& vec)
+{
+    auto it = std::begin(vec);
+    auto end = std::end(vec);
+    for(; it != end; ++it)
+    {
+        if(*it == nullptr)
+            break;
+    }
+
+    return it;
+}
+
 
 TEST_CASE("find_null description")
 {
