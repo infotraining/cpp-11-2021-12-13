@@ -10,26 +10,34 @@
 using namespace std;
 
 // TODO
-template<typename T>
+template <typename T>
 auto find_null(T& vec)
 {
     auto it = std::begin(vec);
     auto end = std::end(vec);
-    for(; it != end; ++it)
+    for (; it != end; ++it)
     {
-        if(*it == nullptr)
+        if (*it == nullptr)
             break;
     }
 
     return it;
 }
 
+namespace Alt
+{
+    template <typename T>
+    auto find_null(T& vec)
+    {
+        return std::find(std::begin(vec), std::end(vec), nullptr);
+    }
+}
 
 TEST_CASE("find_null description")
 {
     SECTION("finds first null pointer in a std container of raw pointers")
     {
-        vector<int*> ptrs = {new int{9}, new int{10}, NULL, new int{20}, nullptr, new int{23}};
+        vector<int*> ptrs = {new int {9}, new int {10}, NULL, new int {20}, nullptr, new int {23}};
 
         auto first_null_pos = find_null(ptrs);
 
@@ -42,7 +50,7 @@ TEST_CASE("find_null description")
 
     SECTION("finds first null pointer in an array of raw pointers")
     {
-        int* ptrs[] = {new int{9}, new int{10}, NULL, new int{20}, nullptr, new int{23}};
+        int* ptrs[] = {new int {9}, new int {10}, NULL, new int {20}, nullptr, new int {23}};
 
         auto first_null_pos = find_null(ptrs);
 
@@ -55,7 +63,7 @@ TEST_CASE("find_null description")
 
     SECTION("finds first empty shared_ptr in a initializer-list of shared_ptrs")
     {
-        auto il = {make_shared<int>(10), shared_ptr<int>{}, make_shared<int>(3)};
+        auto il = {make_shared<int>(10), shared_ptr<int> {}, make_shared<int>(3)};
 
         auto first_null_pos = find_null(il);
 
@@ -76,7 +84,7 @@ TEST_CASE("find_null description")
 
     SECTION("when all pointers are valid returns iterator which equals end()")
     {
-        auto il = {make_shared<int>(10), shared_ptr<int>{new int(5)}, make_shared<int>(3)};
+        auto il = {make_shared<int>(10), shared_ptr<int> {new int(5)}, make_shared<int>(3)};
 
         REQUIRE(find_null(il) == il.end());
     }

@@ -10,24 +10,34 @@ class IGadget
 {
 public:
     virtual void use() const = 0;
-    virtual ~IGadget() { } // TODO: replace user provided implementation with default
+    virtual ~IGadget() = default;
 };
 
-class Gadget : public IGadget
+struct Noncopyable
+{
+    Noncopyable(const Noncopyable&) = delete;
+    Noncopyable& operator=(const Noncopyable&) = delete;
+protected:
+    Noncopyable() = default;
+};
+
+class Gadget : public IGadget, public Noncopyable
 {
     int id_ {-1};
     std::string name_ = "unknown";
 
 public:
-    // TODO: define default constructor
+    Gadget() = default;
+
+    Gadget(int id) : Gadget{id, "Gadget-"s + std::to_string(id)} // delegating contruction to another constructor
+    {
+    }
 
     Gadget(int id, std::string name)
         : id_ {id}
         , name_ {std::move(name)}
     {
     }
-
-    // TODO: delegating constructor
 
     int id() const
     {
@@ -39,7 +49,7 @@ public:
         return name_;
     }
 
-    void use() const // TODO: use override
+    void use() const override
     {
         std::cout << "Using gadget: " << id() << " - " << name() << "\n";
     }
@@ -48,35 +58,50 @@ public:
 class SuperGadget : public Gadget
 {
 public:
-    // TODO: inherit constructors from Gadget
+    using Gadget::Gadget; // inheritance of constructors
 
-    SuperGadget(int id)
-        : Gadget {id, "not-set(super gadget)"}
+    SuperGadget(int id) : SuperGadget{id, "SuperGadget-"s + std::to_string(id)} // delegating contruction to another constructor
     {
     }
 
-    void use() // TODO: control overriding a virtual function
+    void use() const override
     {
         std::cout << "Using super gadget: " << id() << " - " << name() << "\n";
     }
 };
 
-class HyperGadget /* TODO: mark class as final specialization */ : public SuperGadget
+class HyperGadget final : public SuperGadget
 {
+    int extra; // potential problem - uninitialized field
 public:
-    // TODO: inherit constructors from SuperGadget
+    using SuperGadget::SuperGadget;
 
-    void use() const // TODO: control overriding a virtual function
+    void use() const override
     {
         std::cout << "Using hyper gadget: " << id() << " - " << name() << "\n";
     }
 };
 
-// TEST_CASE("inheritance of constructors")
-// {
-//     SuperGadget sg1 {1, "super-gadget"};
-//     SuperGadget sg2 {4};
+TEST_CASE("inheritance of constructors")
+{
+    SuperGadget sg1 {1, "super-gadget"};
+    SuperGadget sg2 {4};
+    sg2.use();
+    SuperGadget sg3;
 
-//     Gadget& g_ref = sg1;
-//     g_ref.use();
-// }
+    Gadget& g_ref = sg1;
+    g_ref.use();
+}
+
+void calculate(int n)
+{
+    std::cout << "n: " << n << "\n";
+}
+
+void calculate(double) = delete;
+
+TEST_CASE("delete common function")
+{
+    calculate(42);
+    //calculate(3.14);
+}
