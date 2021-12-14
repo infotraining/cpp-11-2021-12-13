@@ -1,9 +1,9 @@
 #include "catch.hpp"
 #include <iostream>
-#include <string>
-#include <vector>
 #include <list>
 #include <map>
+#include <string>
+#include <vector>
 
 using namespace std;
 using namespace Catch::Matchers;
@@ -111,15 +111,15 @@ TEST_CASE("using auto for iteration")
     std::cout << "\n--------------------\n";
     int data[] = {1, 2, 3, 4};
 
-    for(auto it = std::begin(data); it != std::end(data); ++it)
+    for (auto it = std::begin(data); it != std::end(data); ++it)
     {
         *it *= 2;
     }
 
-    for(auto it = std::cbegin(data); it != std::cend(data); ++it)
+    for (auto it = std::cbegin(data); it != std::cend(data); ++it)
     {
         std::cout << *it << " ";
-    }   
+    }
     std::cout << "\n";
 }
 
@@ -130,16 +130,16 @@ TEST_CASE("declaration syntax - auto")
         int x1 = 10;
         int x2 = int(10);
         int x3(10);
-        int x4{10};
+        int x4 {10};
     }
 
     SECTION("with auto")
     {
-        auto a1 = 10;  // int
-        auto a2 = int(10);  // int
+        auto a1 = 10; // int
+        auto a2 = int(10); // int
         auto a3(10); // int
-        //auto a4{10}; // std::initializer_list<int> - in C++11/14
-        auto a4{10}; // int - since C++17
+        // auto a4{10}; // std::initializer_list<int> - in C++11/14
+        auto a4 {10}; // int - since C++17
 
         auto list1 = {1, 2, 3, 4}; // std::initializer_list<int>
     }
@@ -148,9 +148,11 @@ TEST_CASE("declaration syntax - auto")
 struct NoDefault
 {
 private:
-    NoDefault() {}
+    NoDefault() { }
+
 public:
-    int foo() {
+    int foo()
+    {
         return 42;
     }
 };
@@ -160,14 +162,14 @@ TEST_CASE("decltype")
     int16_t x = 10;
     decltype(x) y = 20;
 
-    std::vector<decltype(x)> vec = { x, y };
+    std::vector<decltype(x)> vec = {x, y};
 
     auto backup = vec; // copy
     decltype(vec) empty; // no-copy
 
     auto& ref_last_item = vec.back();
 
-    std::map<int, std::string> dict = { {1, "one"}, {2, "two"} };
+    std::map<int, std::string> dict = {{1, "one"}, {2, "two"}};
 
     decltype(dict[3]) ref_value = dict[2];
 
@@ -182,10 +184,62 @@ auto multiply(const T& a, const T& b) -> decltype(a * b)
     return a * b;
 }
 
+namespace LegacyCode
+{
+    template <typename TResult, typename F>
+    TResult call(F f)
+    {
+        std::cout << "Calling a function\n";
+        return f();
+    }
+}
+
+template <typename F>
+decltype(auto) call(F f) 
+{
+    std::cout << "Calling a function\n";
+    return f();
+}
+
+auto f1()
+{
+    return 42;
+}
+
+std::vector<int> f2() 
+{
+    return {1, 2, 3};
+}
+
+auto get_description(int n)
+{
+    const std::string even = "even";
+
+    if (n % 2 == 0)
+        return even;
+    else
+        return "odd"s;
+}
+
+
+template <typename TContainer>
+decltype(auto) get_nth(TContainer& container, size_t n)
+{
+    return container[n];
+}
+
 TEST_CASE("multiply")
 {
     int x = 10;
     int y = 20;
 
     int result = multiply(x, y);
+
+    auto result_2 = call(f1);
+    LegacyCode::call<int>(f1);
+
+    std::vector<bool> vec = {1, 0, 0, 1};
+
+    get_nth(vec, 1) = 1;
+    REQUIRE(vec[1] == 1);
 }
