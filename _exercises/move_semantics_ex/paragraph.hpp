@@ -12,7 +12,7 @@ namespace LegacyCode
         char* buffer_;
 
     protected:
-        void swap(Paragraph& p)
+        void swap(Paragraph& p) noexcept
         {
             std::swap(buffer_, p.buffer_);
         }
@@ -30,13 +30,13 @@ namespace LegacyCode
             std::strcpy(buffer_, p.buffer_);
         }
 
-        Paragraph(Paragraph&& p)
+        Paragraph(Paragraph&& p) noexcept
             : buffer_ {p.buffer_}
         {
             p.buffer_ = nullptr;
         }
 
-        Paragraph& operator=(Paragraph&& p)
+        Paragraph& operator=(Paragraph&& p) noexcept
         {
 
             if (this != &p)
@@ -120,7 +120,7 @@ public:
     {
         cleanup();
     }
-    
+   
     void draw() const override
     {
         p_.render_at(x_, y_);

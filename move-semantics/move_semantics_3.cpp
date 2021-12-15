@@ -58,13 +58,13 @@ public:
 
     /////////////////////////////////////////////////
     // move constructor
-    Data(Data&& source)
-        : name_ {std::move(source.name_)}
-        , data_ {source.data_}
-        , size_ {source.size_}
+    Data(Data&& source) noexcept
+        : name_ {std::move(source.name_)} // ok
+        , data_ {source.data_} // ok
+        , size_ {source.size_} // ok
     {
-        source.data_ = nullptr;
-        source.size_ = 0;
+        source.data_ = nullptr;  // ok
+        source.size_ = 0; // ok
 
         std::cout << "Data(" << name_ << ": mv)\n";
     }
@@ -83,7 +83,7 @@ public:
         return *this;
     }
 
-    ~Data()
+    ~Data() noexcept
     {
         delete[] data_;
     }
@@ -95,22 +95,22 @@ public:
         std::swap(size_, other.size_);
     }
 
-    iterator begin()
+    iterator begin() noexcept
     {
         return data_;
     }
 
-    iterator end()
+    iterator end() noexcept
     {
         return data_ + size_;
     }
 
-    const_iterator begin() const
+    const_iterator begin() const noexcept
     {
         return data_;
     }
 
-    const_iterator end() const
+    const_iterator end() const noexcept
     {
         return data_ + size_;
     }
@@ -118,7 +118,7 @@ public:
     void print(const std::string& prefix)
     {
         std::cout << prefix << ": " << name_ << " - [ ";
-        for(auto it = begin(); it != end(); ++it)
+        for (auto it = begin(); it != end(); ++it)
             std::cout << *it << " ";
         std::cout << "]/n";
     }
@@ -138,7 +138,7 @@ namespace ModernCpp
         Data(std::string name, std::initializer_list<int> list)
             : name_ {std::move(name)}
             , data_ {list}
-        {            
+        {
             std::cout << "Data(" << name_ << ")\n";
         }
 
@@ -174,7 +174,7 @@ namespace LegacyCode
 {
     Data* create_data_set()
     {
-        return new Data{"data-set-one", {54, 6, 34, 235, 64356, 235, 23}};
+        return new Data {"data-set-one", {54, 6, 34, 235, 64356, 235, 23}};
     }
 }
 
@@ -258,4 +258,39 @@ TEST_CASE("DataRow")
 
     DataRow backup = row;
     DataRow target = std::move(row); // copy
+}
+
+struct Type
+{
+    int value;
+
+    void swap(Type& other) noexcept
+    {
+        int temp = value;
+        value = other.value;
+        other.value = temp;
+    }
+};
+
+void foo(Type& a, Type& b) noexcept(noexcept(a.swap(b)))
+{
+    a.swap(b);
+}
+
+TEST_CASE("noexcept")
+{
+    std::cout << "\n--------------------noexcept\n";
+
+    std::vector<Data> vec;
+
+    vec.push_back(Data {"ds1", {1, 2, 3}});
+
+    std::cout << "---\n";
+    vec.push_back(Data {"ds2", {1, 2, 3}});
+
+    std::cout << "---\n";
+    vec.push_back(Data {"ds3", {1, 2, 3}});
+
+    std::cout << "---\n";
+    vec.push_back(Data {"ds4", {1, 2, 3}});
 }
