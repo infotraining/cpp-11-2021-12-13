@@ -14,8 +14,8 @@ public:
     using iterator = int*;
     using const_iterator = const int*;
 
-    Data(std::string name, std::initializer_list<int> list)
-        : name_ {std::move(name)}
+    Data(const std::string& name, std::initializer_list<int> list)
+        : name_ {name} // copy
         , data_ {new int[list.size()]}
         , size_ {list.size()}
     {
@@ -23,6 +23,18 @@ public:
 
         std::cout << "Data(" << name_ << ")\n";
     }
+
+#if _cplusplus > 201102L
+    Data(std::string&& name, std::initializer_list<int> list)
+        : name_ {std::move(name)} // move
+        , data_ {new int[list.size()]}
+        , size_ {list.size()}
+    {
+        std::copy(list.begin(), list.end(), data_);
+
+        std::cout << "Data(" << name_ << ")\n";
+    }
+#endif
 
     Data(const Data& other)
         : name_(other.name_)
@@ -102,6 +114,14 @@ public:
     {
         return data_ + size_;
     }
+
+    void print(const std::string& prefix)
+    {
+        std::cout << prefix << ": " << name_ << " - [ ";
+        for(auto it = begin(); it != end(); ++it)
+            std::cout << *it << " ";
+        std::cout << "]/n";
+    }
 };
 
 namespace ModernCpp
@@ -150,9 +170,18 @@ namespace ModernCpp
     };
 }
 
+namespace LegacyCode
+{
+    Data* create_data_set()
+    {
+        return new Data{"data-set-one", {54, 6, 34, 235, 64356, 235, 23}};
+    }
+}
+
 Data create_data_set()
 {
-    Data ds {"data-set-one", {54, 6, 34, 235, 64356, 235, 23}};
+    std::string name = "data-set-one";
+    Data ds {name, {54, 6, 34, 235, 64356, 235, 23}};
 
     return ds;
 }
