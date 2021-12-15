@@ -18,24 +18,48 @@ namespace LegacyCode
         }
 
     public:
-        Paragraph() : buffer_(new char[1024])
+        Paragraph()
+            : buffer_(new char[1024])
         {
             std::strcpy(buffer_, "Default text!");
         }
 
-        Paragraph(const Paragraph& p) : buffer_(new char[1024])
+        Paragraph(const Paragraph& p)
+            : buffer_(new char[1024])
         {
             std::strcpy(buffer_, p.buffer_);
         }
 
-        Paragraph(const char* txt) : buffer_(new char[1024])
+        Paragraph(Paragraph&& p)
+            : buffer_ {p.buffer_}
+        {
+            p.buffer_ = nullptr;
+        }
+
+        Paragraph& operator=(Paragraph&& p)
+        {
+
+            if (this != &p)
+            {
+                // delete[] buffer_;
+                // buffer_ = p.buffer_;
+                // p.buffer_ = nullptr;
+
+                Paragraph temp = std::move(p); // move constructor
+                swap(temp);
+            }
+            return *this;
+        }
+
+        Paragraph(const char* txt)
+            : buffer_(new char[1024])
         {
             std::strcpy(buffer_, txt);
         }
 
         Paragraph& operator=(const Paragraph& p)
         {
-            Paragraph temp(p);
+            Paragraph temp(p); // copy constructor
             swap(temp);
 
             return *this;
@@ -67,7 +91,7 @@ class Shape
 {
 public:
     virtual ~Shape() = default;
-    virtual void draw() const = 0;    
+    virtual void draw() const = 0;
 };
 
 class Text : public Shape
@@ -76,16 +100,27 @@ class Text : public Shape
     LegacyCode::Paragraph p_;
 
     void cleanup()
-    {}
-public:
-    Text(int x, int y, const std::string& text) : x_{x}, y_{y}, p_{text.c_str()}
-    {}
+    {
+    }
 
-    ~Text() 
+public:
+    Text(int x, int y, const std::string& text)
+        : x_ {x}
+        , y_ {y}
+        , p_ {text.c_str()}
+    {
+    }
+
+    Text(const Text&) = default;
+    Text(Text&&) = default;
+    Text& operator=(const Text&) = default;
+    Text& operator=(Text&&) = default;
+
+    ~Text()
     {
         cleanup();
     }
-
+    
     void draw() const override
     {
         p_.render_at(x_, y_);
@@ -93,7 +128,7 @@ public:
 
     std::string text() const
     {
-        const char* txt = p_.get_paragraph(); 
+        const char* txt = p_.get_paragraph();
         return (txt == nullptr) ? "" : txt;
     }
 
